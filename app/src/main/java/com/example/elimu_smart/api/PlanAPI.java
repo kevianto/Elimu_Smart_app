@@ -10,6 +10,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface PlanAPI {
-    @POST("plan/generate")
+    @POST("/plan/generate")
     Call<PlanResponse> generatePlan(@Body PlanRequest request);
 }

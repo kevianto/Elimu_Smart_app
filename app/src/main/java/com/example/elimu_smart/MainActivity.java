@@ -4,7 +4,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import com.example.elimu_smart.fragments.InputFragment;
+
+import com.example.elimu_smart.fragments.LoginFragment;
+import com.example.elimu_smart.fragments.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -12,8 +14,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Load the input form fragment
-        replaceFragment(new InputFragment());
+        if (savedInstanceState == null) {
+            replaceFragment(new LoginFragment());
+        }
     }
 
     private void replaceFragment(Fragment fragment) {
