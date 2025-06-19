@@ -1,14 +1,15 @@
 package com.example.elimu_smart.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Map;
 
 public class PlanResponse {
-    private String plan;
+    @SerializedName("weeks")
+    private Map<String, Object> weeks;
 
-    public String getPlan() {
-        return plan;
-    }
-
-    public void setPlan(String plan) {
-        this.plan = plan;
+    public Map<String, Object> getWeeks() {
+        return weeks;
     }
 }
+

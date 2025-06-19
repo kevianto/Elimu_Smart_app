@@ -67,7 +67,7 @@ public class SignupFragment extends Fragment {
             return;
         }
 
-        AuthAPI authAPI = RetrofitClient.getInstance().create(AuthAPI.class);
+        AuthAPI authAPI =  RetrofitClient.getInstance(getActivity()).create(AuthAPI.class);
         Call<SignupResponse> call = authAPI.signup(new SignupRequest(name, email, password));
 
         call.enqueue(new Callback<SignupResponse>() {
@@ -78,7 +78,7 @@ public class SignupFragment extends Fragment {
 
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, new ProfileFragment())
+                            .replace(R.id.fragment_container, new LoginFragment())
                             .commit();
 
                 } else {

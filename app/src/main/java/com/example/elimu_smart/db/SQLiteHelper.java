@@ -1,6 +1,7 @@
 package com.example.elimu_smart.db;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -23,6 +24,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS profile");
         db.execSQL("DROP TABLE IF EXISTS plan");
         onCreate(db);
+    }
+    public boolean isProfileAvailable() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM profile LIMIT 1", null);
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
     }
 }
 

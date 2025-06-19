@@ -10,9 +10,9 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface AuthAPI {
-    @POST("/auth/login") // adjust to your Node.js route
+    @POST("auth/login")
     Call<LoginResponse> login(@Body LoginRequest loginRequest);
-    @POST("/auth/register")
+    @POST("auth/register")
     Call<SignupResponse> signup(@Body SignupRequest signupRequest);
 
 }

@@ -18,6 +18,9 @@ import androidx.annotation.Nullable;
 import com.example.elimu_smart.R;
 import com.example.elimu_smart.api.AuthAPI;
 import com.example.elimu_smart.api.RetrofitClient;
+import com.example.elimu_smart.api.TokenManager;
+import com.example.elimu_smart.db.DBHelper;
+import com.example.elimu_smart.db.SQLiteHelper;
 import com.example.elimu_smart.models.LoginRequest;
 import com.example.elimu_smart.models.LoginResponse;
 
@@ -66,7 +69,7 @@ public class LoginFragment extends Fragment {
             return;
         }
 
-        AuthAPI authAPI = RetrofitClient.getInstance().create(AuthAPI.class);
+        AuthAPI authAPI =  RetrofitClient.getInstance(getActivity()).create(AuthAPI.class);
         Call<LoginResponse> call = authAPI.login(new LoginRequest(email, password));
 
         call.enqueue(new Callback<LoginResponse>() {
@@ -74,11 +77,19 @@ public class LoginFragment extends Fragment {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(getActivity(), "Login success!", Toast.LENGTH_SHORT).show();
+                    try {
+                        TokenManager.saveToken(getActivity(), response.body().getToken());
 
-                    requireActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, new DashboardFragment())
-                            .commit();
+                        Fragment nextFragment = new ProfileFragment();
+
+                        requireActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, nextFragment)
+                                .commit();
+                    } catch (Exception e) {
+                        Toast.makeText(getActivity(), "Crash: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
 
 
                 } else {

@@ -17,7 +17,7 @@ import com.example.elimu_smart.R;
 import com.example.elimu_smart.api.PlanAPI;
 import com.example.elimu_smart.api.RetrofitClient;
 import com.example.elimu_smart.models.PlanRequest;
-import com.example.elimu_smart.models.PlanResponse;
+import com.example.elimu_smart.models.ServerResponse;
 import com.example.elimu_smart.db.DBHelper;
 
 import retrofit2.Call;
@@ -42,13 +42,12 @@ public class ProfileFragment extends Fragment {
         editTime = view.findViewById(R.id.editTime);
         Button submitButton = view.findViewById(R.id.btnSubmit);
 
-        submitButton.setOnClickListener(v -> sendToBackend());
+        submitButton.setOnClickListener(v -> sendProfileToBackend());
 
         return view;
     }
 
-    private void sendToBackend() {
-
+    private void sendProfileToBackend() {
         String career = editCareer.getText().toString().trim();
         String grades = editGrades.getText().toString().trim();
         String time = editTime.getText().toString().trim();
@@ -57,37 +56,32 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getActivity(), "All fields are required!", Toast.LENGTH_SHORT).show();
             return;
         }
+
         DBHelper dbHelper = new DBHelper(getActivity());
         dbHelper.saveProfile(career, grades, time);
 
-        PlanAPI planAPI = RetrofitClient.getInstance().create(PlanAPI.class);
-        Call<PlanResponse> call = planAPI.generatePlan(new PlanRequest(career, grades, time));
+        PlanAPI planAPI =  RetrofitClient.getInstance(getActivity()).create(PlanAPI.class);
+        Call<ServerResponse> call = planAPI.sendProfileOnly(new PlanRequest(career, grades, time));
 
-        call.enqueue(new Callback<PlanResponse>() {
+        call.enqueue(new Callback<ServerResponse>() {
             @Override
-            public void onResponse(Call<PlanResponse> call, Response<PlanResponse> response) {
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String plan = response.body().getPlan();
-                    dbHelper.savePlan(plan);
+                    Toast.makeText(getActivity(), "Profile saved, generating plan...", Toast.LENGTH_SHORT).show();
 
-                    DashboardFragment dashboardFragment = new DashboardFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("plan", plan);
-                    dashboardFragment.setArguments(bundle);
-
+                    // Navigate to Dashboard
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, dashboardFragment)
+                            .replace(R.id.fragment_container, new DashboardFragment())
                             .addToBackStack(null)
                             .commit();
-
                 } else {
-                    Toast.makeText(getActivity(), "Failed to get response", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Failed to save profile", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<PlanResponse> call, Throwable t) {
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
                 Toast.makeText(getActivity(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
