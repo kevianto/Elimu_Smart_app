@@ -16,9 +16,12 @@ import com.example.elimu_smart.api.PlanAPI;
 import com.example.elimu_smart.api.RetrofitClient;
 import com.example.elimu_smart.api.TokenManager;
 import com.example.elimu_smart.db.DBHelper;
+import com.example.elimu_smart.models.Day;
 import com.example.elimu_smart.models.PlanResponse;
+import com.example.elimu_smart.models.Week;
 import com.example.elimu_smart.utils.JwtUtils;
-import com.google.gson.Gson;
+
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,13 +65,31 @@ public class DashboardFragment extends Fragment {
         call.enqueue(new Callback<PlanResponse>() {
             @Override
             public void onResponse(Call<PlanResponse> call, Response<PlanResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String jsonPlan = new Gson().toJson(response.body().getWeeks());
-                    resultText.setText(jsonPlan);
+                if (response.isSuccessful() && response.body() != null && response.body().getWeeks() != null) {
+                    Map<String, Week> weeks = response.body().getWeeks();
+                    StringBuilder display = new StringBuilder();
 
-                    new DBHelper(getActivity()).savePlan(jsonPlan); // Save locally
+                    for (Map.Entry<String, Week> entry : weeks.entrySet()) {
+                        String weekKey = entry.getKey();
+                        Week week = entry.getValue();
+
+                        display.append("\n\n📘 ").append(weekKey.toUpperCase()).append(" - ").append(week.getTitle()).append("\n");
+                        display.append(week.getDescription()).append("\n");
+
+                        appendDay(display, "Day 1", week.getDay1());
+                        appendDay(display, "Day 2", week.getDay2());
+                        appendDay(display, "Day 3", week.getDay3());
+                        appendDay(display, "Day 4", week.getDay4());
+                        appendDay(display, "Day 5", week.getDay5());
+                        appendDay(display, "Day 6", week.getDay6());
+                        appendDay(display, "Day 7", week.getDay7());
+                    }
+
+                    resultText.setText(display.toString());
+                    new DBHelper(getActivity()).savePlan(display.toString());
+
                 } else {
-                    resultText.setText("No plan found.");
+                    resultText.setText("No plan found or failed to parse.");
                 }
             }
 
@@ -77,5 +98,17 @@ public class DashboardFragment extends Fragment {
                 resultText.setText("Error fetching plan: " + t.getMessage());
             }
         });
+    }
+
+    private void appendDay(StringBuilder sb, String dayLabel, Day day) {
+        if (day == null) return;
+
+        sb.append("\n🔹 ").append(dayLabel).append("\n");
+        sb.append("Task: ").append(day.getTask()).append("\n");
+        sb.append("Milestone: ").append(day.getMilestone()).append("\n");
+        sb.append("Resources:\n");
+        for (String res : day.getResources()) {
+            sb.append(" - ").append(res).append("\n");
+        }
     }
 }

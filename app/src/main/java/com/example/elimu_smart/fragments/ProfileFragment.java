@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,10 +67,11 @@ public class ProfileFragment extends Fragment {
         call.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                Log.d("On Response","response "+ response.body());
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(getActivity(), "Profile saved, generating plan...", Toast.LENGTH_SHORT).show();
 
-                    // Navigate to Dashboard
+
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragment_container, new DashboardFragment())
