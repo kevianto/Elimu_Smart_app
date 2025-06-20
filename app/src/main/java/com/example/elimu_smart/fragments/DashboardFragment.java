@@ -1,6 +1,7 @@
 package com.example.elimu_smart.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,9 @@ import com.example.elimu_smart.models.Day;
 import com.example.elimu_smart.models.PlanResponse;
 import com.example.elimu_smart.models.Week;
 import com.example.elimu_smart.utils.JwtUtils;
+import com.google.gson.Gson;
 
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -39,9 +42,7 @@ public class DashboardFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         resultText = view.findViewById(R.id.resultText);
-
         fetchPlanFromBackend();
-
         return view;
     }
 
@@ -66,6 +67,8 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onResponse(Call<PlanResponse> call, Response<PlanResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getWeeks() != null) {
+                    Log.d("Plan Raw Response", new Gson().toJson(response.body()));
+
                     Map<String, Week> weeks = response.body().getWeeks();
                     StringBuilder display = new StringBuilder();
 
@@ -101,14 +104,21 @@ public class DashboardFragment extends Fragment {
     }
 
     private void appendDay(StringBuilder sb, String dayLabel, Day day) {
-        if (day == null) return;
+        if (day == null || day.getTask() == null) return;
 
         sb.append("\n🔹 ").append(dayLabel).append("\n");
         sb.append("Task: ").append(day.getTask()).append("\n");
-        sb.append("Milestone: ").append(day.getMilestone()).append("\n");
-        sb.append("Resources:\n");
-        for (String res : day.getResources()) {
-            sb.append(" - ").append(res).append("\n");
+
+        if (day.getMilestone() != null) {
+            sb.append("Milestone: ").append(day.getMilestone()).append("\n");
+        }
+
+        List<String> resources = day.getResources();
+        if (resources != null && !resources.isEmpty()) {
+            sb.append("Resources:\n");
+            for (String res : resources) {
+                sb.append(" - ").append(res).append("\n");
+            }
         }
     }
 }
